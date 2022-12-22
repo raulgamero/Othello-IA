@@ -19,7 +19,7 @@ public class PlayerMiniMax implements IPlayer, IAuto {
 
     String name;
     private int millorHeuristica;
-    private int profunditat = 5;
+    private int profunditat = 6;
     private int contJugades = 0;
     private int[][] stabilityTable = {
         {4,  -3,  2,  2,  2,  2, -3,  4,},
