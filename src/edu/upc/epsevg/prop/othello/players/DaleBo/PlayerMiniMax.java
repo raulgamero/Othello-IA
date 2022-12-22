@@ -6,7 +6,6 @@ import edu.upc.epsevg.prop.othello.IAuto;
 import edu.upc.epsevg.prop.othello.IPlayer;
 import edu.upc.epsevg.prop.othello.Move;
 import edu.upc.epsevg.prop.othello.SearchType;
-import edu.upc.epsevg.prop.othello.players.DaleBo.Auxiliar;
 import java.awt.Point;
 import static java.text.NumberFormat.Field.INTEGER;
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ public class PlayerMiniMax implements IPlayer, IAuto {
 
     String name;
     private int millorHeuristica;
-    private int profunditat = 6;
+    private int profunditat = 5;
     private int contJugades = 0;
     private int[][] stabilityTable = {
         {4,  -3,  2,  2,  2,  2, -3,  4,},
