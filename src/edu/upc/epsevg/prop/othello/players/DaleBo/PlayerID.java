@@ -8,6 +8,10 @@ import edu.upc.epsevg.prop.othello.Move;
 import edu.upc.epsevg.prop.othello.SearchType;
 import java.awt.Point;
 import java.util.ArrayList;
+import edu.upc.epsevg.prop.othello.players.DaleBo.Pair;
+import static java.lang.Thread.sleep;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -18,6 +22,7 @@ public class PlayerID implements IPlayer, IAuto {
     private int millorHeuristica;
     private int maxProf;
     private int contJugades = 0;
+    private boolean fin = false;
     private int[][] stabilityTable = {
         {4,  -3,  2,  2,  2,  2, -3,  4,},
         {-3, -4, -1, -1, -1, -1, -4, -3,},
@@ -44,20 +49,23 @@ public class PlayerID implements IPlayer, IAuto {
     public Move move(GameStatus s) {
         
         ArrayList<Point> moves =  s.getMoves();
+        Pair bestmoviment = new Pair(-1000000, null);
         
         millorHeuristica = -1000000;
+        fin = false;
+        int prof = 0;
         
-        if(moves.isEmpty())
-        {
-            // no podem moure, el moviment (de tipus Point) es passa null.
-            return new Move(null, contJugades,maxProf,  SearchType.MINIMAX); 
-        } else {
-            // cridem el minimax per a que ens retorni un moviment
-            int q = miniMax(s);
+        // cridem el minimax per a que ens retorni un moviment, anirem incrementant la profunditat fins que no salti el timeout
+        while(!fin){
+            Pair q = miniMax(s, prof);
             
-            Point punto = moves.get(q);
-            return new Move( punto, contJugades, maxProf, SearchType.MINIMAX);         
-          }
+            if(q.heuristica > bestmoviment.heuristica){
+                bestmoviment = q;
+            }
+            
+            prof+=1;            
+        }
+        return new Move( bestmoviment.punt, contJugades, prof, SearchType.MINIMAX_IDS);
     }
     
     /**
@@ -66,7 +74,7 @@ public class PlayerID implements IPlayer, IAuto {
      * @param profunditat numero de nodes als que baixarem per predir els moviments (profunditat del minimax).
      * @return la columna del el millor moviment depenent de la heuristica que haguem calculat.
      */
-    private int miniMax(GameStatus s) {
+    private Pair miniMax(GameStatus s, int prof) {
         int millorMov = 0;
         int alpha = -1000;
         int beta = 1000;
@@ -75,18 +83,21 @@ public class PlayerID implements IPlayer, IAuto {
 
         // per cada moviment possible
         for (int i = 0; i < moves.size(); i++) {
+            if(fin) break;
             // creem un game status auxiliar i li afegim la nova tirada
             GameStatus sAux = new GameStatus(s);
             sAux.movePiece(moves.get(i));
             // començem el min/max per el min amb profunditat -1 ja que ja hem fet una tirada
-            int valorNou = min(sAux, maxProf+1, alpha, beta);
+            int valorNou = min(sAux, prof-1, alpha, beta);
             // en cas de que la nova heuristica sigui millor que la anterior, actualitzarem la millor heuristica i la columna del millor moviment
             if(valorNou > millorHeuristica){
                 millorHeuristica = valorNou;
                 millorMov = i;
             }
         }
-        return millorMov;
+        Point punto = moves.get(millorMov);
+        Pair moviment = new Pair(millorHeuristica, punto);
+        return moviment;
     }
     
     /**
@@ -116,6 +127,7 @@ public class PlayerID implements IPlayer, IAuto {
 
         // per cada moviment possible
         for (int i = 0; i < moves.size(); i++) {
+            if(fin) break;
             // creem un nou tauler auxiliar i li afegim la nova tirada (del rival)
             GameStatus tMin = new GameStatus(sAux);
             tMin.movePiece(moves.get(i));
@@ -158,6 +170,7 @@ public class PlayerID implements IPlayer, IAuto {
 
         // per cada moviment possible
         for (int i = 0; i < moves.size(); i++) {
+            if(fin) break;
             // creem un nou tauler auxiliar i li afegim la nova tirada (del rival)
             GameStatus tMax = new GameStatus(sAux);
             tMax.movePiece(moves.get(i));
@@ -259,6 +272,8 @@ public class PlayerID implements IPlayer, IAuto {
     @Override
     public void timeout() {
         // Bah! Humans do not enjoy timeouts, oh, poor beasts !
+        System.out.println("TIEMPOOOOO");
+        fin = true;
     }
 
     /**
