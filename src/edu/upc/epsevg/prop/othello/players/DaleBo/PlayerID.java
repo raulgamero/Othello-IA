@@ -53,7 +53,7 @@ public class PlayerID implements IPlayer, IAuto {
         
         millorHeuristica = -1000000;
         fin = false;
-        int prof = 0;
+        int prof = 1;
         
         // cridem el minimax per a que ens retorni un moviment, anirem incrementant la profunditat fins que no salti el timeout
         while(!fin){
@@ -62,7 +62,6 @@ public class PlayerID implements IPlayer, IAuto {
             if(q.heuristica > bestmoviment.heuristica){
                 bestmoviment = q;
             }
-            
             prof+=1;            
         }
         return new Move( bestmoviment.punt, contJugades, prof, SearchType.MINIMAX_IDS);
@@ -170,7 +169,6 @@ public class PlayerID implements IPlayer, IAuto {
 
         // per cada moviment possible
         for (int i = 0; i < moves.size(); i++) {
-            if(fin) break;
             // creem un nou tauler auxiliar i li afegim la nova tirada (del rival)
             GameStatus tMax = new GameStatus(sAux);
             tMax.movePiece(moves.get(i));
