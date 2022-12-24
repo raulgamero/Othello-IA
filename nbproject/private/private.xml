@@ -3,9 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/A:/Docencia/Material_Moduls/UPC/PROP/CURS_PROP_Q1/0_Laboratori/9Othello/Othello/Othello/src/edu/upc/epsevg/prop/othello/Board.java</file>
-            <file>file:/A:/Docencia/Material_Moduls/UPC/PROP/CURS_PROP_Q1/0_Laboratori/9Othello/Othello/Othello/src/edu/upc/epsevg/prop/othello/Game.java</file>
-            <file>file:/A:/Docencia/Material_Moduls/UPC/PROP/CURS_PROP_Q1/0_Laboratori/9Othello/Othello/Othello/src/edu/upc/epsevg/prop/othello/players/RandomPlayer.java</file>
+            <file>file:/C:/Users/raulg/OneDrive/Documentos/GitHub/Othello-IA/src/edu/upc/epsevg/prop/othello/players/DaleBo/Auxiliar.java</file>
+            <file>file:/C:/Users/raulg/OneDrive/Documentos/GitHub/Othello-IA/src/edu/upc/epsevg/prop/othello/players/DaleBo/PlayerMiniMax.java</file>
+            <file>file:/C:/Users/raulg/OneDrive/Documentos/GitHub/Othello-IA/src/edu/upc/epsevg/prop/othello/players/DaleBo/PlayerID.java</file>
         </group>
     </open-files>
 </project-private>

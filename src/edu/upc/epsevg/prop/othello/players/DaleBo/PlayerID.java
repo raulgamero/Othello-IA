@@ -20,29 +20,22 @@ import java.util.logging.Logger;
 public class PlayerID implements IPlayer, IAuto {
     String name;
     private int millorHeuristica;
-    private int maxProf;
     private int contJugades = 0;
     private boolean fin = false;
-    private int[][] stabilityTable = {
-        {4,  -3,  2,  2,  2,  2, -3,  4,},
-        {-3, -4, -1, -1, -1, -1, -4, -3,},
-        {2,  -1,  1,  0,  0,  1, -1,  2,},
-        {2,  -1,  0,  1,  1,  0, -1,  2,},
-        {2,  -1,  0,  1,  1,  0, -1,  2,},
-        {2,  -1,  1,  0,  0,  1, -1,  2,},
-        {-3, -4, -1, -1, -1, -1, -4, -3,},
-        {4,  -3,  2,  2,  2,  2, -3,  4}
-    };
 
+    /**
+     * Constructor del PlayerID
+     *
+     * @param name Nom del jugador.
+     */
     public PlayerID(String name) {
         this.name = name;
     }
 
     /**
-     * Decideix el moviment del jugador donat un tauler i un color de peça que
-     * ha de posar.
-     *
-     * @param s Tauler i estat actual de joc.
+     * Decideix el moviment del jugador donat un tauler i un color de peça que ha de posar.
+     * Ho fa mitjançant el IDS (Iterative Depeening)
+     * @param s estat actual de joc.
      * @return el moviment que fa el jugador.
      */
     @Override
@@ -69,9 +62,9 @@ public class PlayerID implements IPlayer, IAuto {
     
     /**
      * Funcio on començem el calcul del algoritme Min i Max per trobar la millor heuristica.
-     * @param t el tauler del joc.
-     * @param profunditat numero de nodes als que baixarem per predir els moviments (profunditat del minimax).
-     * @return la columna del el millor moviment depenent de la heuristica que haguem calculat.
+     * @param s el estat del joc.
+     * @param prof numero de nodes als que baixarem per predir els moviments (profunditat del minimax).
+     * @return el millor moviment depenent de la heuristica que haguem calculat.
      */
     private Pair miniMax(GameStatus s, int prof) {
         int millorMov = 0;
@@ -82,13 +75,13 @@ public class PlayerID implements IPlayer, IAuto {
 
         // per cada moviment possible
         for (int i = 0; i < moves.size(); i++) {
-            if(fin) break;
+            if (fin) break;
             // creem un game status auxiliar i li afegim la nova tirada
             GameStatus sAux = new GameStatus(s);
             sAux.movePiece(moves.get(i));
             // començem el min/max per el min amb profunditat -1 ja que ja hem fet una tirada
             int valorNou = min(sAux, prof-1, alpha, beta);
-            // en cas de que la nova heuristica sigui millor que la anterior, actualitzarem la millor heuristica i la columna del millor moviment
+            // en cas de que la nova heuristica sigui millor que la anterior, actualitzarem la millor heuristica i el millor moviment
             if(valorNou > millorHeuristica){
                 millorHeuristica = valorNou;
                 millorMov = i;
@@ -101,8 +94,7 @@ public class PlayerID implements IPlayer, IAuto {
     
     /**
      * Funcio que calcula la menor heuristica del seus nodes fills.
-     * @param tAux Tauler auxiliar on s'ha afegit una nova tirada.
-     * @param columna Columna on hem realitzat l'ultima tirada.
+     * @param sAux Estat de joc auxiliar on s'ha afegit una nova tirada.
      * @param profunditat numero de nodes als que baixarem per predir els moviments (profunditat del minimax).
      * @param alpha Paramatre per la poda alpha-beta.
      * @param beta Paramatre per la poda alpha-beta.
@@ -117,7 +109,7 @@ public class PlayerID implements IPlayer, IAuto {
         //si no es solucio i hem arribat a la profunditat 0 o ja no tenim mes opcions de tirada, sumarem 1 al numero de jugades i retornarem l'heuristica de la tirada.
         } else if (profunditat == 0 || (sAux.getMoves().isEmpty())) {
             contJugades = contJugades + 1;
-            return stability(sAux, sAux.getCurrentPlayer());
+            return heuristica(sAux, sAux.getCurrentPlayer());
         }
         
         int minValue = 10000;   
@@ -143,13 +135,12 @@ public class PlayerID implements IPlayer, IAuto {
     }
     
     /**
-     * Funcio que calcula la major heuristica del seus nodes fills.
-     * @param tAux Tauler auxiliar on s'ha afegit una nova tirada.
-     * @param columna Columna on hem realitzat l'ultima tirada.
+     * Funcio que calcula la menor heuristica del seus nodes fills.
+     * @param sAux Estat de joc auxiliar on s'ha afegit una nova tirada.
      * @param profunditat numero de nodes als que baixarem per predir els moviments (profunditat del minimax).
      * @param alpha Paramatre per la poda alpha-beta.
      * @param beta Paramatre per la poda alpha-beta.
-     * @return La major heuristica que ha calculat.
+     * @return La menor heuristica que ha calculat.
      */
     private int max(GameStatus sAux, int profunditat, int alpha, int beta) {
         // si la tirada realitzada resulta ser una solucio, tornem un valor molt alt per dir que hem guanyat la jugada i sumem 1 al numero de jugades
@@ -160,7 +151,7 @@ public class PlayerID implements IPlayer, IAuto {
         //si no es solucio i hem arribat a la profunditat 0 o ja no tenim mes opcions de tirada, sumarem 1 al numero de jugades i retornarem l'heuristica de la tirada.
         } else if (profunditat == 0 || (sAux.getMoves().isEmpty())) {
             contJugades = contJugades + 1;
-            return stability(sAux, sAux.getCurrentPlayer());
+            return heuristica(sAux, sAux.getCurrentPlayer());
         }
         
         int maxValue = -10000;
@@ -169,6 +160,7 @@ public class PlayerID implements IPlayer, IAuto {
 
         // per cada moviment possible
         for (int i = 0; i < moves.size(); i++) {
+            if(fin) break;
             // creem un nou tauler auxiliar i li afegim la nova tirada (del rival)
             GameStatus tMax = new GameStatus(sAux);
             tMax.movePiece(moves.get(i));
@@ -185,12 +177,11 @@ public class PlayerID implements IPlayer, IAuto {
     }
     
     /**
-     * Funcio que calcula l'heuristica de la tirada.
-     * @param t Tauler on s'ha de calcular l'heuristica de la tirada.
-     * @param player
-     * @return L'heuristica calculada de la tirada.
+     * Funcio que calcula l'heuristica de coin parity de la tirada.
+     * @param t esta de joc on s'ha de calcular l'heuristica de la tirada.
+     * @param player jugador del que calcularem l'heurísitca.
+     * @return L'heuristica coin parity calculada de la tirada.
      */
-    
     public int coin_parity(GameStatus t, CellType player) {
         int player_coins = t.getScore(player);
         int enemy_coins = t.getScore(CellType.opposite(player));
@@ -198,6 +189,12 @@ public class PlayerID implements IPlayer, IAuto {
         return 25 * (player_coins - enemy_coins) / (player_coins + enemy_coins);
     }
     
+    /**
+     * Funcio que calcula l'heuristica corners_gotcha de la tirada.
+     * @param Max_player_corners cantonades capturades pel jugador max.
+     * @param Min_player_corners cantonades capturades pel jugador min.
+     * @return L'heuristica corners_gotcha calculada de la tirada.
+     */
     public int corners_gotcha(int Max_player_corners, int Min_player_corners){
         if (Max_player_corners + Min_player_corners != 0){
             return 500 * (Max_player_corners - Min_player_corners) / (Max_player_corners + Min_player_corners);
@@ -206,6 +203,12 @@ public class PlayerID implements IPlayer, IAuto {
             return 0;
     }
     
+    /**
+     * Funcio que calcula l'heuristica mobilty de la tirada.
+     * @param t esta de joc on s'ha de calcular l'heuristica de la tirada.
+     * @param player jugador que tira.
+     * @return L'heuristica mobilty calculada de la tirada.
+     */
     public int mobilty(GameStatus t, CellType player) {
         int player_moves = t.getMoves().size();
         
@@ -218,12 +221,16 @@ public class PlayerID implements IPlayer, IAuto {
         else return 0;
     }
     
-    public int stability(GameStatus t, CellType player) {
+    /**
+     * Funcio que calcula l'heuristica mobility
+     * @param t Tauler on s'ha de calcular l'heuristica de la tirada.
+     * @param player El jugador concret
+     * @return L'heuristica general recollida
+     */
+    public int heuristica(GameStatus t, CellType player) {
         
         int heu = 0;
         int size = t.getSize();
-        
-        CellType enemy = CellType.opposite(player);
         
         int player_corners = 0, enemy_corners = 0;
         
@@ -245,17 +252,6 @@ public class PlayerID implements IPlayer, IAuto {
             else enemy_corners += 1;
         }
         
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if(t.getPos(i, j) == player){
-                    heu += stabilityTable[i][j];
-                }
-                if(t.getPos(i, j) == enemy){
-                    heu -= stabilityTable[i][j];
-                }
-            }  
-        }
-        
         heu += corners_gotcha(player_corners, enemy_corners);
         heu += coin_parity(t, player);
         heu += mobilty(t, player);
@@ -266,11 +262,10 @@ public class PlayerID implements IPlayer, IAuto {
     /**
      * Ens avisa que hem de parar la cerca en curs perquè s'ha exhaurit el temps
      * de joc.
+     * En aquest cas posem el boolea fin a true, el que indicarà a les funcions que iteren els nivells que han de parar.
      */
     @Override
     public void timeout() {
-        // Bah! Humans do not enjoy timeouts, oh, poor beasts !
-        System.out.println("TIEMPOOOOO");
         fin = true;
     }
 
